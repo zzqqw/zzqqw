@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>crash</title>
+    <style>
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            overflow: hidden;
+            background: #f6f6f6;
+            position: relative;
+            margin: 0;
+            padding: 0;
+        }
+
+        .box {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            color: #606266;
+            text-align: center;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-size: 16px;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .box {
+            padding: 6px 0;
+        }
+
+        .bottomBox {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 20px;
+            font-size: 20px;
+            text-align: center;
+            line-height: 20px;
+        }
+
+        .bottomBox a {
+            font-weight: 400;
+            color: #909399;
+            padding: 0;
+            font-size: 12px;
+        }
+
+        .circle-img {
+            border-radius: 50%;
+            width: 128px;
+            height: 128px;
+        }
+
+        .box div span {
+            display: inline-block;
+            width: 120px;
+            font-size: 16px;
+            line-height: 20px;
+            text-align: left;
+            font-weight: 700;
+            vertical-align: text-top;
+        }
+
+        h2 {
+            border-bottom: 1px solid #ccc;
+            color: #909399;
+            font-weight: 400;
+        }
+
+        h1 {
+            font-size: 30px;
+            font-weight: 400;
+        }
+
+        #loding {
+            color: #a79f9f;
+            position: absolute;
+        }
+
+        .loding-box {
+            position: relative;
+        }
+    </style>
+    <style>
+        /* 竖屏 */
+        @media (orientation: portrait) {
+            html {
+                font-size: 1vw;
+            }
+        }
+
+        /* 横屏 */
+        @media (orientation: landscape) {
+            html {
+                font-size: 1vh;
+            }
+        }
+
+        /* html{
+                font-size: 1vh;
+            } */
+
+        #AD-box {
+            background: #1f67b3;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            color: #fff;
+            font-size: 2rem;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .face {
+            font-size: 9rem;
+            line-height: 11rem;
+        }
+
+        .show-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .text {
+            font-size: 3rem;
+        }
+        .load-box{
+            display: inline-block;
+            width: 10rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <h1>点我有彩蛋</h1>
+    </div>
+
+
+    <div id="AD-box">
+        <div class="show-content">
+            <span class="face">:(</span>
+            <p class="text">你的电脑遇到问题，需要重新启动</p>
+            <p class="text">
+                我们只收集某些错误信息，然后为你重新启动。(完成:<span class="load-box"><span id="load">0</span>%)</span>
+            </p>
+            <p><span>如果你想了解更多信息,则可以稍后在线搜索此错误:
+                    INVALID_AFFINITY_SET</span< /p>
+        </div>
+    </div>
+
+    <script>
+        window.onerror = (e) => console.log(1, e)
+        let load = 0
+        let pointerLockElement = null;
+        // // 元素全屏
+        function useRequestFullscreen(elem) {
+            const key = ['requestFullscreen', 'mozRequestFullScreen', 'webkitRequestFullscreen', 'msRequestFullscreen']
+            for (const value of key) {
+                if (elem[value]) {
+                    elem[value]()
+                    return true
+                }
+            }
+            return false
+        }
+        function getFullscreenElement() {
+            const key = ['fullscreenElement', 'webkitFullscreenElement']
+            for (const value of key) {
+                if (document[value]) {
+                    return document[value]
+                }
+            }
+            return null
+        }
+        // 兼容Safari 
+        document.exitFullscreenUniversal = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen
+        // 指针锁定或解锁
+        document.addEventListener(
+            "pointerlockchange",
+            () => {
+                // 锁定的元素是否为当前的元素 -- 没啥也意义可以去掉
+                if (document.pointerLockElement === pointerLockElement) {
+                    console.log("指针锁定成功了。");
+                } else {
+                    pointerLockElement = null;
+                    console.log("已经退出锁定。");
+                }
+            },
+            false
+        );
+        // 锁定失败事件
+        document.addEventListener(
+            "pointerlockerror",
+            (e) => {
+                console.log("锁定指针时出错。");
+            },
+            false
+        );
+        // 锁定指针,锁定指针的元素必须让用户点一下才能锁定,Safari下与全屏功能不可在一个事件触发下同时使用
+        function lockPointer(elem) {
+            // 如果已经存锁定的元素则不操作,不生效Safari 
+            if (document.pointerLockElement) {
+                return;
+            }
+            if (elem) {
+                pointerLockElement = elem;
+                elem.requestPointerLock();
+            }
+        }
+
+        // 解除锁定,解锁后再次锁定需要重新激活元素才行,点一下其他DOM然后再激活即可
+        function unlockPointer() {
+            document.exitPointerLock();
+        }
+
+        function sleep(num) {
+            return new Promise(r => {
+                setTimeout(() => r(), num)
+            })
+        }
+        let cancelLastTime = null
+        const ADbox = document.getElementById("AD-box");
+        const endCallback = () => {
+            const state = !!getFullscreenElement()
+            console.log('fullscreenchange', state);
+            if (!state) {
+                ADbox.style.opacity = 0;
+                ADbox.style.cursor = 'auto';
+                cancelLastTime && cancelLastTime()
+            }
+        }
+        addEventListener("fullscreenchange", endCallback);
+        // 兼容Safari 
+        addEventListener("webkitfullscreenchange", endCallback);
+        // 必须用点击事件触发才能全屏
+        ADbox.addEventListener("click", main);
+        async function main() {
+            if (cancelLastTime) {
+                return
+            }
+            if (useRequestFullscreen(ADbox)) {
+
+                // Safari 下与 requestFullscreen 方法不可同个交互事件下调用
+                lockPointer(ADbox);
+                ADbox.style.opacity = 1;
+                ADbox.style.cursor = 'none'; // 兼容简单粗暴一下
+                try {
+                    // 翻转屏幕,横屏
+                    window.screen.orientation.lock('landscape')
+                } catch (error) {
+                    // lock返回是个Promise,一般不会走到这,但万一浏览器没有lock方法呢?
+                    console.error('可能的错误,没有window.screen.orientation.lock方法导致报错');
+                }
+            } else {
+                alert('这啥设备居然不支持....换个浏览器吧')
+                return
+            }
+            let loadNum = 0
+            let isLoad = true;
+            cancelLastTime = () => {
+                isLoad = false;
+                cancelLastTime = null
+                unlockPointer();
+            }
+            while (loadNum < 100) {
+                await sleep(100)
+                // 中途退出了
+                if (isLoad === false) {
+                    loadNum = 100
+                    console.log('退出');
+                    return
+                }
+                loadNum += Math.round(Math.random())
+                if (loadNum >= 100) {
+                    loadNum = 100
+                }
+                document.getElementById('load').innerText = loadNum
+            }
+            await sleep(1000)
+            // 解除
+            const state = !!getFullscreenElement();
+            // 是否全屏状态
+            if (state) {
+                // 取消全屏
+                document.exitFullscreenUniversal()
+                unlockPointer();
+            }
+            ADbox.style.opacity = 0;
+            ADbox.style.cursor = 'auto';
+            isLoad = false
+        }
+    </script>
+</body>
+
+</html>
